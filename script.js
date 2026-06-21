@@ -1,3 +1,4 @@
+(function() {
 const ALL_EMOJIS = ['🐶', '🐱', '🐼', '🦊', '🦁', '🐸', '🐵', '🐰', '🐨', '🐯', '🐮', '🐷', '🐹', '🐻', '🦝', '🐺', '🐴', '🦓', '🐘', '🦒'];
 
 const DIFFICULTY_CONFIG = {
@@ -50,6 +51,7 @@ const changeDiffFailBtn = document.getElementById('change-diff-fail-btn');
 const failDiffEl = document.getElementById('fail-difficulty');
 const failProgressEl = document.getElementById('fail-progress');
 const failFlipsEl = document.getElementById('fail-flips');
+const resultTimeLabel = document.getElementById('result-time-label');
 
 function getAudioContext() {
     if (!audioCtx) {
@@ -117,15 +119,26 @@ function toggleSound() {
     }
 }
 
-function showComboFloat(streakCount, x, y) {
+function showComboFloat(streakCount, cardElement) {
+    const container = document.querySelector('.game-container');
+    const containerRect = container.getBoundingClientRect();
+    const containerStyle = getComputedStyle(container);
+    const paddingLeft = parseFloat(containerStyle.paddingLeft);
+    const paddingTop = parseFloat(containerStyle.paddingTop);
+    const cardRect = cardElement.getBoundingClientRect();
+
     const el = document.createElement('div');
     el.className = 'combo-float';
     el.textContent = `Combo x${streakCount}`;
     const fontSize = Math.min(1.2 + streakCount * 0.3, 3.5);
     el.style.fontSize = `${fontSize}rem`;
-    el.style.left = `${x}px`;
-    el.style.top = `${y}px`;
-    document.body.appendChild(el);
+    const offsetX = cardRect.left + cardRect.width / 2 - containerRect.left - paddingLeft;
+    const offsetY = cardRect.top - containerRect.top - paddingTop;
+    el.style.left = `${offsetX}px`;
+    el.style.top = `${offsetY}px`;
+    el.style.transform = 'translateX(-50%)';
+
+    container.appendChild(el);
     el.addEventListener('animationend', () => el.remove());
 }
 
@@ -133,6 +146,8 @@ function initGame() {
     stopTimer();
     stopCountdown();
     elapsedSeconds = 0;
+    startTime = null;
+    remainingSeconds = 0;
     gameStarted = false;
     gameFailed = false;
     cards = [];
@@ -248,10 +263,7 @@ function handleMatch(firstIndex, secondIndex) {
     streakCountEl.textContent = streak;
 
     if (streak >= 2) {
-        const rect = secondEl.getBoundingClientRect();
-        const cx = rect.left + rect.width / 2 - 50;
-        const cy = rect.top;
-        showComboFloat(streak, cx, cy);
+        showComboFloat(streak, secondEl);
     }
 
     playMatchSound();
@@ -390,6 +402,11 @@ function clearHistory() {
 }
 
 function calculateStars() {
+    if (currentDifficulty === 'challenge') {
+        if (remainingSeconds >= 60) return 3;
+        if (remainingSeconds >= 30) return 2;
+        return 1;
+    }
     const pairs = DIFFICULTY_CONFIG[currentDifficulty].pairs;
     if (flipCount <= pairs * 1.5) return 3;
     if (flipCount <= pairs * 2.5) return 2;
@@ -410,11 +427,20 @@ function saveBestRecord(stars, flips, time) {
     try {
         const key = `memory-card-best-${currentDifficulty}`;
         const current = getBestRecord();
-        if (!current || stars > current.stars ||
-            (stars === current.stars && flips < current.flips) ||
-            (stars === current.stars && flips === current.flips && time < current.time)) {
-            localStorage.setItem(key, JSON.stringify({ stars, flips, time }));
-            return true;
+        if (currentDifficulty === 'challenge') {
+            if (!current || stars > current.stars ||
+                (stars === current.stars && remainingSeconds > current.remainingSeconds) ||
+                (stars === current.stars && remainingSeconds === current.remainingSeconds && flips < current.flips)) {
+                localStorage.setItem(key, JSON.stringify({ stars, flips, remainingSeconds }));
+                return true;
+            }
+        } else {
+            if (!current || stars > current.stars ||
+                (stars === current.stars && flips < current.flips) ||
+                (stars === current.stars && flips === current.flips && time < current.time)) {
+                localStorage.setItem(key, JSON.stringify({ stars, flips, time }));
+                return true;
+            }
         }
         return false;
     } catch (e) {
@@ -426,8 +452,13 @@ function updateBestRecordDisplay() {
     const record = getBestRecord();
     if (record) {
         const starStr = '⭐'.repeat(record.stars);
-        bestRecordEl.textContent = `${starStr} ${record.flips}次`;
-        bestRecordEl.title = `${starStr} · ${record.flips}次翻牌 · ${formatTime(record.time)}`;
+        if (currentDifficulty === 'challenge') {
+            bestRecordEl.textContent = `${starStr} ${formatTime(record.remainingSeconds)}`;
+            bestRecordEl.title = `${starStr} · 剩余${formatTime(record.remainingSeconds)} · ${record.flips}次翻牌`;
+        } else {
+            bestRecordEl.textContent = `${starStr} ${record.flips}次`;
+            bestRecordEl.title = `${starStr} · ${record.flips}次翻牌 · ${formatTime(record.time)}`;
+        }
     } else {
         bestRecordEl.textContent = '-';
         bestRecordEl.title = '暂无记录';
@@ -435,13 +466,23 @@ function updateBestRecordDisplay() {
 }
 
 function showWinModal() {
+    const isChallenge = currentDifficulty === 'challenge';
+
+    finalDiffEl.textContent = DIFFICULTY_CONFIG[currentDifficulty].name;
+    finalFlipsEl.textContent = `${flipCount}次`;
+
     const stars = calculateStars();
     const isNewRecord = saveBestRecord(stars, flipCount, elapsedSeconds);
 
-    finalDiffEl.textContent = DIFFICULTY_CONFIG[currentDifficulty].name;
-    finalTimeEl.textContent = formatTime(elapsedSeconds);
-    finalFlipsEl.textContent = `${flipCount}次`;
+    if (isChallenge) {
+        resultTimeLabel.textContent = '剩余时间';
+        finalTimeEl.textContent = formatTime(remainingSeconds);
+    } else {
+        resultTimeLabel.textContent = '用时';
+        finalTimeEl.textContent = formatTime(elapsedSeconds);
+    }
 
+    starsContainer.style.display = '';
     const starEls = starsContainer.querySelectorAll('.star');
     starEls.forEach((star, idx) => {
         star.classList.remove('earned');
@@ -493,3 +534,4 @@ changeDiffFailBtn.addEventListener('click', () => {
 clearHistoryBtn.addEventListener('click', clearHistory);
 
 initGame();
+})();

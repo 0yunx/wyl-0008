@@ -16,6 +16,7 @@ body {
 }
 
 .game-container {
+    position: relative;
     background: rgba(255, 255, 255, 0.95);
     border-radius: 24px;
     padding: 30px;
@@ -347,7 +348,7 @@ h1 {
 }
 
 .combo-float {
-    position: fixed;
+    position: absolute;
     pointer-events: none;
     z-index: 999;
     font-weight: 900;
@@ -360,15 +361,15 @@ h1 {
 @keyframes comboFloat {
     0% {
         opacity: 1;
-        transform: translateY(0) scale(0.5);
+        transform: translateX(-50%) translateY(0) scale(0.5);
     }
     20% {
         opacity: 1;
-        transform: translateY(-20px) scale(1.2);
+        transform: translateX(-50%) translateY(-20px) scale(1.2);
     }
     100% {
         opacity: 0;
-        transform: translateY(-100px) scale(1);
+        transform: translateX(-50%) translateY(-100px) scale(1);
     }
 }
 
