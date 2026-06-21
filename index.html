@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>记忆翻牌游戏</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎴 记忆翻牌游戏</h1>
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-label">翻牌次数</span>
+                <span id="flip-count" class="stat-value">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">已匹配</span>
+                <span id="match-count" class="stat-value">0 / 8</span>
+            </div>
+        </div>
+        <div id="game-board" class="game-board"></div>
+        <button id="reset-btn" class="reset-btn">🔄 重新开始</button>
+    </div>
+    <div id="win-modal" class="modal">
+        <div class="modal-content">
+            <h2>🎉 恭喜通关！</h2>
+            <p>你用了 <span id="final-flips">0</span> 次翻牌完成了游戏！</p>
+            <button id="play-again-btn" class="modal-btn">再玩一次</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
