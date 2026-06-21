@@ -28,6 +28,11 @@
                     <span class="diff-text">困难</span>
                     <span class="diff-desc">5×4 · 10对</span>
                 </button>
+                <button class="diff-btn" data-diff="challenge">
+                    <span class="diff-icon">⏳</span>
+                    <span class="diff-text">限时挑战</span>
+                    <span class="diff-desc">5×4 · 120秒</span>
+                </button>
             </div>
         </div>
 
@@ -53,6 +58,13 @@
                     <span id="match-count" class="stat-value">0 / 8</span>
                 </div>
             </div>
+            <div class="stat-item">
+                <span class="stat-icon">🔥</span>
+                <div class="stat-content">
+                    <span class="stat-label">连击</span>
+                    <span id="streak-count" class="stat-value">0</span>
+                </div>
+            </div>
             <div class="stat-item best-record">
                 <span class="stat-icon">🏆</span>
                 <div class="stat-content">
@@ -64,7 +76,10 @@
 
         <div id="game-board" class="game-board"></div>
 
-        <button id="reset-btn" class="reset-btn">🔄 重新开始</button>
+        <div class="action-buttons">
+            <button id="reset-btn" class="reset-btn">🔄 重新开始</button>
+            <button id="sound-toggle-btn" class="sound-btn" title="音效开关">🔊</button>
+        </div>
 
         <div class="history-section">
             <div class="history-header">
@@ -105,6 +120,31 @@
             <div class="modal-buttons">
                 <button id="play-again-btn" class="modal-btn primary">再玩一次</button>
                 <button id="change-diff-btn" class="modal-btn secondary">换个难度</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="fail-modal" class="modal">
+        <div class="modal-content fail-modal-content">
+            <div class="fail-icon">⏰</div>
+            <h2>时间到！</h2>
+            <div class="result-stats">
+                <div class="result-item">
+                    <span class="result-label">难度</span>
+                    <span id="fail-difficulty" class="result-value">-</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">已完成</span>
+                    <span id="fail-progress" class="result-value">-</span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">翻牌</span>
+                    <span id="fail-flips" class="result-value">-</span>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button id="retry-btn" class="modal-btn primary">再试一次</button>
+                <button id="change-diff-fail-btn" class="modal-btn secondary">换个难度</button>
             </div>
         </div>
     </div>
