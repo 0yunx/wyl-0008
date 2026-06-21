@@ -112,7 +112,7 @@ function toggleSound() {
     soundEnabled = !soundEnabled;
     soundToggleBtn.textContent = soundEnabled ? '🔊' : '🔇';
     soundToggleBtn.classList.toggle('muted', !soundEnabled);
-    if (soundEnabled) {
+    if (soundEnabled && !gameFailed) {
         playTone(600, 0.1, 'sine', 0.1);
     }
 }
@@ -324,7 +324,7 @@ function startCountdown() {
         timerEl.textContent = formatTime(remainingSeconds);
         elapsedSeconds = elapsed;
 
-        if (remainingSeconds <= 10 && remainingSeconds > 0) {
+        if (remainingSeconds <= 30 && remainingSeconds > 0) {
             timerEl.classList.add('countdown-warning');
         } else {
             timerEl.classList.remove('countdown-warning');
